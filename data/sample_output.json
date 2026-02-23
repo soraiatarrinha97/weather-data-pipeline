@@ -1,0 +1,47 @@
+[
+  {
+    "city":"Lisbon",
+    "country":"PT",
+    "lat":38.7167,
+    "lon":-9.1333,
+    "temp_c":20.59,
+    "humidity":49,
+    "pressure":1023,
+    "weather_main":"Clear",
+    "weather_desc":"clear sky",
+    "wind_speed":4.63,
+    "wind_deg":170,
+    "distance_to_ref_km":116.5184146249,
+    "ref_city":"Tomar"
+  },
+  {
+    "city":"Porto",
+    "country":"PT",
+    "lat":41.1496,
+    "lon":-8.611,
+    "temp_c":22.73,
+    "humidity":28,
+    "pressure":1022,
+    "weather_main":"Clear",
+    "weather_desc":"clear sky",
+    "wind_speed":3.09,
+    "wind_deg":200,
+    "distance_to_ref_km":172.7006549461,
+    "ref_city":"Tomar"
+  },
+  {
+    "city":"Coimbra",
+    "country":"PT",
+    "lat":40.2056,
+    "lon":-8.4195,
+    "temp_c":21.23,
+    "humidity":43,
+    "pressure":1022,
+    "weather_main":"Clouds",
+    "weather_desc":"overcast clouds",
+    "wind_speed":0.45,
+    "wind_deg":108,
+    "distance_to_ref_km":67.0251772412,
+    "ref_city":"Tomar"
+  }
+]
