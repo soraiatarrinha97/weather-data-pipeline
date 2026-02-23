@@ -96,8 +96,6 @@ Create a `.env` file in the root directory:
 
     OPENWEATHER_API_KEY=YOUR_API_KEY_HERE
 
-Important: - Do not use quotes 
-
 ------------------------------------------------------------------------
 
 ## Running the Pipeline
