@@ -1,5 +1,8 @@
 # Weather Data Pipeline & Exploratory Analysis
 
+[![Python tests](https://github.com/soraiatarrinha97/weather-data-pipeline/actions/workflows/tests.yml/badge.svg)](https://github.com/soraiatarrinha97/weather-data-pipeline/actions/workflows/tests.yml)
+
+
 A Python data pipeline for collecting, transforming and analysing weather observations from Portuguese cities. Originally developed for a Master's project (2021–2022) and updated in 2026 as a reproducible portfolio project.
 
 **Academic context:** Master's Degree in **Business Intelligence and Analytics**, Instituto Politécnico de Tomar (English description used for this portfolio).
@@ -10,7 +13,7 @@ A Python data pipeline for collecting, transforming and analysing weather observ
 - **OpenWeather API** ingestion with explicit Portugal (`PT`) validation to reduce ambiguous city-name matches.
 - **pandas** transformations, **geopy** geodesic distance calculations and timestamped **JSON/CSV** snapshots.
 - A **Jupyter Notebook** for exploratory data analysis, temperature/humidity visualisations and an interactive **Folium** map.
-- **4 offline pytest tests** and a GitHub Actions workflow configured to run them on pushes and pull requests.
+- **9 offline pytest test cases** and a GitHub Actions workflow configured to run them on pushes and pull requests.
 
 > This is a portfolio and learning project, not a production service. Live API ingestion requires your own OpenWeather API key and an internet connection.
 
@@ -42,12 +45,15 @@ src/pipeline.py                                     |
 ```text
 weather-data-pipeline/
 ├── .github/workflows/tests.yml        # GitHub Actions: offline tests
+├── assets/                            # Plots based on historical observations
 ├── notebooks/Weather_Analysis_Portfolio.ipynb
 ├── sample_data/historic_weather_2021_2022.csv
 ├── scripts/run_pipeline.py            # CLI entry point
 ├── scripts/run_pipeline.bat           # Windows helper
+├── scripts/generate_readme_assets.py  # Re-create the README plots
 ├── src/pipeline.py                     # Extraction, transformation, persistence
-├── tests/test_pipeline.py             # Offline pytest tests
+├── tests/test_pipeline.py             # Core offline pytest tests
+├── tests/test_error_handling.py        # Failure-path and missing-data tests
 ├── legacy/                             # Preserved academic implementation
 ├── .env.example
 ├── .gitignore
@@ -86,6 +92,41 @@ DATA_SOURCE = "runs"
 
 Then run all notebook cells again. Multiple collections over time are needed for meaningful time-series comparisons.
 
+## Results & visualisations
+
+The following figures are **real plots generated from the 1,243 historical observations (29 Dec 2021 – 3 Jan 2022)** included in this repository. They are *not* live forecasts or screenshots of simulated API responses.
+
+### Temperature through time
+
+![Historical temperature trends in Peniche, Tomar, Coimbra and Beja](assets/temperature_timeseries.png)
+
+Six-hour average temperatures for four of the cities in the original dataset. Averages are calculated from observations in each six-hour interval.
+
+### Relative humidity by city
+
+![Average historical humidity across 11 cities](assets/humidity_by_city.png)
+
+Mean humidity over the included historical period, grouped by city and sorted for comparison.
+
+### Data preview
+
+A few **historical observations** from `sample_data/historic_weather_2021_2022.csv` (the temperature and humidity values are original observations, not current weather):
+
+| City | Temperature (°C) | Humidity (%) | Recorded at |
+| --- | ---: | ---: | --- |
+| Peniche | 17.99 | 84 | 2021-12-29 12:00 |
+| Tomar | 16.70 | 92 | 2021-12-29 12:00 |
+| Coimbra | 16.36 | 69 | 2021-12-29 12:00 |
+| Braga | 15.09 | 94 | 2021-12-29 12:00 |
+
+To regenerate both figures after modifying the sample data:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/generate_readme_assets.py
+```
+
+The **interactive Folium map** is available in [the notebook](notebooks/Weather_Analysis_Portfolio.ipynb); it is not represented by these static charts.
+
 ## Data analysis
 
 The notebook demonstrates:
@@ -105,7 +146,7 @@ The original 2021–2022 collection contains a ~1,652 km distance for **Beja**, 
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-The 4 offline tests cover normal pipeline output, explicit output paths, empty city lists and rejection of non-Portuguese locations. API responses are mocked; these tests **do not** verify live OpenWeather availability. A workflow in `.github/workflows/tests.yml` runs them on GitHub Actions; check the **Actions** tab for the latest result.
+The **9 offline pytest test cases** cover normal pipeline output, explicit output paths, empty city lists, rejection of non-Portuguese locations, missing API keys, HTTP 401/500 errors, and incomplete coordinates. API responses are mocked; these tests **do not** verify live OpenWeather availability. A workflow in `.github/workflows/tests.yml` runs them on GitHub Actions; check the **Actions** tab for the latest result.
 
 ## Limitations and possible extensions
 
