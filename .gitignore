@@ -7,4 +7,5 @@ venv/
 .env
 data/*
 !data/runs/
+data/runs/*
 !data/runs/.gitkeep
