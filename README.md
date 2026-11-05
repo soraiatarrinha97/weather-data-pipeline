@@ -1,93 +1,119 @@
 # Weather Data Pipeline & Exploratory Analysis
 
-A Python portfolio project for collecting, transforming, storing, and analysing weather observations from Portuguese cities. Originally developed as academic work in 2021–2022, it has since been reorganised into a modular pipeline with an offline analysis notebook and automated tests.
+A Python data pipeline for collecting, transforming and analysing weather observations from Portuguese cities. Originally developed for a Master's project (2021–2022) and updated in 2026 as a reproducible portfolio project.
 
-**Stack:** Python · pandas · OpenWeather API · Requests · geopy · Matplotlib · Folium · Jupyter · pytest
+**Academic context:** Master's Degree in **Business Intelligence and Analytics**, Instituto Politécnico de Tomar (English description used for this portfolio).
 
-## What the project does
+## At a glance
 
-1. **Extract:** request current weather observations from OpenWeather for selected cities, explicitly restricting the search to Portugal.
-2. **Transform:** extract temperature, humidity, pressure, wind and geographic coordinates; calculate geodesic distance to a reference city; attach a collection timestamp.
-3. **Load:** save each run as JSON and CSV, and update `data/latest_weather.json` and `data/latest_weather.csv`.
-4. **Analyse:** use pandas and Jupyter to explore the data, plot trends and correlations, and display city markers on an interactive Folium map.
+- **11 cities** and **1,243 historical observations** collected between 29 December 2021 and 3 January 2022, included for an offline demonstration.
+- **OpenWeather API** ingestion with explicit Portugal (`PT`) validation to reduce ambiguous city-name matches.
+- **pandas** transformations, **geopy** geodesic distance calculations and timestamped **JSON/CSV** snapshots.
+- A **Jupyter Notebook** for exploratory data analysis, temperature/humidity visualisations and an interactive **Folium** map.
+- **4 offline pytest tests** and a GitHub Actions workflow configured to run them on pushes and pull requests.
+
+> This is a portfolio and learning project, not a production service. Live API ingestion requires your own OpenWeather API key and an internet connection.
+
+## Architecture
 
 ```text
-OpenWeather API ──> Python extraction/transformation ──> JSON & CSV snapshots
-                                                           │
-Historical academic CSV ────────────────────────────────────┤
-                                                           ▼
-                                                Jupyter / pandas EDA
-                                                           │
-                                               Matplotlib + Folium
+OpenWeather API (live mode)             Historic sample CSV (offline mode)
+            |                                        |
+            v                                        |
+src/pipeline.py                                     |
+  - fetch + validate city (PT)                      |
+  - extract structured fields                       |
+  - compute distance to reference city              |
+  - timestamp each collection                       |
+            |                                        |
+            v                                        |
+ data/runs/*_weather.json + .csv                    |
+ data/latest_weather.json + .csv                    |
+            |                                        |
+            +-------------------+--------------------+
+                                |
+                                v
+                 notebooks/Weather_Analysis_Portfolio.ipynb
+                      pandas / Matplotlib / Folium
 ```
 
-## Demonstration dataset
-
-The repository includes `sample_data/historic_weather_2021_2022.csv`: **1,243 observations from 11 cities**, collected between **29 December 2021 and 3 January 2022** as part of the original academic project. The notebook can analyse this dataset **without an API key**.
-
-**Known historical limitation:** the original data includes an incorrect distance for Beja due to ambiguous geocoding (Beja, Tunisia instead of Beja, Portugal). This value is intentionally identified as a historical data-quality issue. The refactored API pipeline adds `,PT` to city queries and verifies the returned country, rather than claiming that the original data was error-free. Coordinates used for the sample map are approximate presentation coordinates.
-
-## Project structure
+## Repository layout
 
 ```text
 weather-data-pipeline/
-├── src/pipeline.py                    # Extraction, transformation, persistence
-├── scripts/run_pipeline.py            # Command-line interface
-├── scripts/run_pipeline.bat           # Optional Conda-based Windows helper
+├── .github/workflows/tests.yml        # GitHub Actions: offline tests
 ├── notebooks/Weather_Analysis_Portfolio.ipynb
 ├── sample_data/historic_weather_2021_2022.csv
+├── scripts/run_pipeline.py            # CLI entry point
+├── scripts/run_pipeline.bat           # Windows helper
+├── src/pipeline.py                     # Extraction, transformation, persistence
 ├── tests/test_pipeline.py             # Offline pytest tests
-├── legacy/                            # Original academic implementation
-├── .env.example                       # API key placeholder (safe to share)
-├── requirements.txt
-└── README.md
+├── legacy/                             # Preserved academic implementation
+├── .env.example
+├── .gitignore
+└── requirements.txt
 ```
 
-## Quick start — Windows / VS Code
+## Quick start (Windows / VS Code)
 
-From the repository root, create a virtual environment and install dependencies:
+From the repository root, with Python 3.13 installed:
 
 ```powershell
-py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
+py -3.13 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pytest -q
 ```
 
-Open `notebooks/Weather_Analysis_Portfolio.ipynb` in VS Code, select the interpreter from `.venv` as the Jupyter kernel, keep `DATA_SOURCE = "sample"`, and choose **Run All**. This is the easiest way to explore the project; **no key or internet connection to the weather API is needed**.
+In VS Code, open `notebooks/Weather_Analysis_Portfolio.ipynb`, select the Python kernel from `.venv`, then choose **Run All**. The default `DATA_SOURCE = "sample"` uses the included historical CSV and does **not** require an API key. The notebook contains saved outputs so its analyses can also be reviewed on GitHub.
 
-## Collect new weather observations
+## Run a live collection
 
-1. Create a `.env` file in the repository root by copying `.env.example`.
-2. Replace the placeholder in the **local** `.env` with an active OpenWeather API key. Never commit this file.
-3. Execute:
+1. Copy `.env.example` to a new `.env` file at the repository root.
+2. Replace the placeholder with your **own** OpenWeather API key in `.env`. Never commit this file or paste the key into code or screenshots.
+3. Run the pipeline from the repository root:
 
 ```powershell
-.\.venv\Scripts\python.exe -m scripts.run_pipeline --ref-city "Peniche" --cities "Tomar" "Coimbra" "Braga" --out-dir data/runs
+.\.venv\Scripts\python.exe -m scripts.run_pipeline --ref-city "Peniche" --cities "Tomar" "Coimbra" "Braga" "Beja" --out-dir data/runs
 ```
 
-This writes timestamped weather snapshots under `data/runs/` and updates the latest JSON/CSV files under `data/`.
+The pipeline writes timestamped `.json` and `.csv` files under `data/runs/` and updates `data/latest_weather.json` and `data/latest_weather.csv`. These generated files are intentionally excluded from Git.
 
-To analyse the new snapshots instead of the academic dataset, set `DATA_SOURCE = "runs"` in the notebook and select **Run All**. Multiple collections over time are needed for meaningful time-series comparisons. The current command performs one collection per invocation; automatic recurring scheduling is **not** part of the Python CLI itself.
+To analyse accumulated live snapshots, change the notebook setting to:
 
-## Tests
+```python
+DATA_SOURCE = "runs"
+```
 
-Four tests run offline with mocked API responses; no OpenWeather key is needed:
+Then run all notebook cells again. Multiple collections over time are needed for meaningful time-series comparisons.
+
+## Data analysis
+
+The notebook demonstrates:
+
+- Data loading, type conversion, cleaning and missing-value checks with **pandas**
+- Exploratory summaries and temperature/humidity visualisation
+- Basic correlation analysis (subject to data coverage)
+- An interactive **Folium** map of the selected Portuguese cities
+
+### Historical data-quality issue: Beja
+
+The original 2021–2022 collection contains a ~1,652 km distance for **Beja**, because a weather lookup resolved to Beja, Tunisia. The historical observations and distance are preserved to document this issue. The offline map uses approximate Portuguese city-centre coordinates for illustration. The modern pipeline requests `city,PT` and validates that OpenWeather returns `PT` to mitigate this ambiguity. Map distances are geodesic (straight-line), not road distances.
+
+## Tests and automation
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-They cover snapshot persistence, explicit output paths, validation of an empty city list and rejection of non-Portuguese locations. GitHub Actions also runs these tests on pushes and pull requests.
+The 4 offline tests cover normal pipeline output, explicit output paths, empty city lists and rejection of non-Portuguese locations. API responses are mocked; these tests **do not** verify live OpenWeather availability. A workflow in `.github/workflows/tests.yml` runs them on GitHub Actions; check the **Actions** tab for the latest result.
 
-## Scope and limitations
+## Limitations and possible extensions
 
-- A reproducible **portfolio / academic-to-practical** pipeline, not a production-hosted service.
-- API ingestion and snapshot persistence work locally when valid credentials and network access are available; live API integration is not part of the offline test suite.
-- No database, Docker deployment, monitoring or automatic scheduling is implemented in the current version.
-- The historical Beja geocoding anomaly is documented rather than silently corrected.
+- Live API calls depend on an external service and a valid, active API key.
+- The dataset is small and historical; the included sample is suitable for demonstrating the analysis workflow, not for current meteorological conclusions.
+- There is no deployed scheduler or database service. Potential future improvements include periodic scheduling, PostgreSQL storage and additional integration tests.
+- The `legacy/` folder preserves the original academic code for reference and is not the supported execution path.
 
-## Academic context
+## Author
 
-Originally developed for the **Mestrado em Analítica e Inteligência Organizacional** (* Analytics and Business Intelligence*), Instituto Politécnico de Tomar, 2021–2022. Subsequently adapted into this portfolio version.
-
-**Author:** Soraia Pedro Tarrinha
+**Soraia Pedro Tarrinha** — Python, SQL and data analysis
