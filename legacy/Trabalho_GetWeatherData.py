@@ -9,6 +9,7 @@
 ##		 Name			   Date		Comment
 ##		-----------------  -----------  ------------------------------
 ##		 Soraia Tarrinha	 	20-12-2021	First Version
+##      Soraia Tarrinha     05-11-2026 -    API corrections
 ################################################################################
 import requests
 from geopy import distance
@@ -16,6 +17,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 import json
+import os
 from os import path
 import io
 from itertools import chain
@@ -23,7 +25,7 @@ from itertools import chain
 
 ref_city = 'Peniche'
 ListOfCities = ['Tomar','Coimbra','Braga', 'Castelo Branco', 'Beja', 'Sabugal', 'Lisboa', 'Viseu','Aljustrel', 'Leiria']
-Key="97938e2e363fc7b425f46d9413606a03"
+Key = os.getenv("OPENWEATHER_API_KEY")
 url_api = "http://api.openweathermap.org/data/2.5/weather"
 filename='weatherdata.json'
 rows_list = []
