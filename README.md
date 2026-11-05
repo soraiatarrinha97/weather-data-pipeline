@@ -45,7 +45,7 @@ src/pipeline.py                                     |
 ```text
 weather-data-pipeline/
 ├── .github/workflows/tests.yml        # GitHub Actions: offline tests
-├── assets/                            # Plots based on historical observations
+├── assets/                            # Historical plots and Folium map screenshot
 ├── notebooks/Weather_Analysis_Portfolio.ipynb
 ├── sample_data/historic_weather_2021_2022.csv
 ├── scripts/run_pipeline.py            # CLI entry point
@@ -125,7 +125,15 @@ To regenerate both figures after modifying the sample data:
 .\.venv\Scripts\python.exe scripts/generate_readme_assets.py
 ```
 
-The **interactive Folium map** is available in [the notebook](notebooks/Weather_Analysis_Portfolio.ipynb); it is not represented by these static charts.
+### Geographic distribution — Folium
+
+![Map of Portuguese cities included in the weather analysis](assets/weather_map.png)
+
+The map shows the selected Portuguese cities in the project. For the historical 2021–2022 dataset, markers use **approximate city-centre coordinates for visualisation only**; live API collections use the coordinates returned by OpenWeather. The screenshot was captured from the locally rendered Folium map, since GitHub's static notebook preview cannot execute its interactive JavaScript.
+
+**Map data and tiles:** © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
+
+To use the **interactive map**, open [the notebook](notebooks/Weather_Analysis_Portfolio.ipynb) locally with Jupyter and run the Folium cell. The static image above is provided so visitors can see the geographic result directly on GitHub.
 
 ## Data analysis
 
